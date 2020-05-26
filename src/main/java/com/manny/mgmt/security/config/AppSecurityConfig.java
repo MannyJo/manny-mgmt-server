@@ -48,8 +48,8 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterAfter(new JwtTokenVerifier(jwtProperties, secretKey), JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 .antMatchers("/", "/css/*", "/js/*").permitAll()
-                .antMatchers("/admin/**").hasRole(ADMIN.name())
                 .antMatchers("/api/user/create").permitAll()
+                .antMatchers("/api/user/**").hasAnyRole(ADMIN.name(), USER.name())
                 .antMatchers("/api/storage/**").hasAnyRole(ADMIN.name(), USER.name())
                 .anyRequest()
                 .authenticated();
@@ -58,12 +58,20 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource()
     {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://storage-management.netlify.app"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        CorsConfiguration loginConfiguration = new CorsConfiguration();
+        loginConfiguration.setAllowedOrigins(Arrays.asList("*"));
+        loginConfiguration.setAllowedMethods(Arrays.asList("POST"));
+        loginConfiguration.setExposedHeaders(Arrays.asList("Authorization"));
+
+        CorsConfiguration normalConfiguration = new CorsConfiguration();
+        normalConfiguration.setAllowedOrigins(Arrays.asList("*"));
+        normalConfiguration.setAllowedMethods(Arrays.asList("*"));
+        normalConfiguration.setAllowedHeaders(Arrays.asList("*"));
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/login", loginConfiguration);
+        source.registerCorsConfiguration("/api/**", normalConfiguration);
+
         return source;
     }
 
