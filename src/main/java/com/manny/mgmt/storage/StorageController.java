@@ -13,6 +13,7 @@ import java.util.List;
 
 @RequestMapping("api/storage")
 @RestController
+@CrossOrigin("*")
 public class StorageController {
 
 	
